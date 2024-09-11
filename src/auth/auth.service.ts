@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { AuthDto } from './dto/auth.dto';
 import { PrismaService } from 'src/prisma.service';
 import { UpdateMeDto } from './dto/update-me.dto';
@@ -10,40 +10,45 @@ export class AuthService {
     constructor(private readonly prisma:PrismaService){}
 
     async auth(authDto: AuthDto) {
-        const checkUser = await this.prisma.users.findFirst({
-            where: {
-                fullName: authDto.fullName,
-                className: authDto.className
-            }
-        })
-        if(!checkUser) {
-            await this.prisma.users.create({
-                data: {
-                    className: authDto.className,
-                    fullName: authDto.fullName
-                }
-            })
-            const user = await this.prisma.users.findFirst({
+        try {
+            const checkUser = await this.prisma.users.findFirst({
                 where: {
                     fullName: authDto.fullName,
                     className: authDto.className
                 }
             })
-            await this.prisma.users_sessions.create({
-                data: {
-                    tgId: authDto.tgId,
-                    userId: user.id
-                }
-            })
-        }else {
-            await this.prisma.users_sessions.create({
-                data: {
-                    userId: checkUser.id,
-                    tgId: authDto.tgId
-                }
-            })
+            if(!checkUser) {
+                await this.prisma.users.create({
+                    data: {
+                        className: authDto.className,
+                        fullName: authDto.fullName
+                    }
+                })
+                const user = await this.prisma.users.findFirst({
+                    where: {
+                        fullName: authDto.fullName,
+                        className: authDto.className
+                    }
+                })
+                await this.prisma.users_sessions.create({
+                    data: {
+                        tgId: authDto.tgId,
+                        userId: user.id
+                    }
+                })
+            }else {
+                await this.prisma.users_sessions.create({
+                    data: {
+                        userId: checkUser.id,
+                        tgId: authDto.tgId
+                    }
+                })
+            }
+            return {message: 'secsess'}
+        } catch (error) {
+            throw new HttpException({error}, 500)
         }
-        return {message: 'secsess'}
+        
     }
 
     async getMe(tgId: number) {
@@ -63,22 +68,27 @@ export class AuthService {
     }
 
     async getMySessions(tgId: number) {
-        const session = await this.prisma.users_sessions.findFirst({
-            where: {
-                tgId: Number(tgId)
-            }
-        })
-        const user = await this.prisma.users.findFirst({
-            where: {
-                id: session.userId
-            }
-        })
-        const sessions = await this.prisma.users_sessions.findMany({
-            where: {
-                userId: user.id
-            }
-        })
-        return sessions
+        try {
+            const session = await this.prisma.users_sessions.findFirst({
+                where: {
+                    tgId: Number(tgId)
+                }
+            })
+            const user = await this.prisma.users.findFirst({
+                where: {
+                    id: session.userId
+                }
+            })
+            const sessions = await this.prisma.users_sessions.findMany({
+                where: {
+                    userId: user.id
+                }
+            })
+            return sessions
+        } catch (error) {
+            throw new HttpException({error}, 500)
+        }
+        
     }
 
     async updateMe(tgId: number, updateMeDto: UpdateMeDto) {
