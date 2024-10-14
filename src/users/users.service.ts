@@ -80,5 +80,6 @@ export class UsersService {
         } catch (e) {
             throw new HttpException({e}, 500)
         }
+    }
 
 }
