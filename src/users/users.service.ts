@@ -69,4 +69,16 @@ export class UsersService {
         
     }
 
+    async getOneUser(id: string) {
+        try {
+            const user = await this.prisma.users.findFirst({
+                where: {
+                    id: id
+                }
+            })
+            return e
+        } catch (e) {
+            hrow new HttpException({e}, 500)
+        }
+
 }
