@@ -20,7 +20,7 @@ export class UsersController {
   @Get('/:id')
   findOne(@Param('id') id: string) {
     if (!isValidObjectId(id)) {
-      throw new BadRequestException('Invalid user ID format.');
+      throw new HttpException('Invalid user ID format.', 500);
     }
     return this.usersService.getOneUser (id);
   }
