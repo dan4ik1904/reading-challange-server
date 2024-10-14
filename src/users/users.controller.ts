@@ -15,6 +15,13 @@ export class UsersController {
     return this.usersService.findAll()
   }
 
+  @ApiOperation({ summary: 'Получение одного пользователя' })
+  @ApiOkResponse({ description: 'Успешное дного пользователя' })
+  @Get('/:id')
+  findOne() {
+    return this.usersService.getOneUser(id)
+  }
+
   @ApiOperation({ summary: 'Получение списка топ пользователей' })
   @ApiOkResponse({ description: 'Успешное получение списка топ пользователей' })
   @Get('/top')
