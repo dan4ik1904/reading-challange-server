@@ -78,7 +78,7 @@ export class UsersService {
             })
             return e
         } catch (e) {
-            hrow new HttpException({e}, 500)
+            throw new HttpException({e}, 500)
         }
 
 }
