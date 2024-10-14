@@ -16,24 +16,14 @@ export class UsersController {
   }
 
   @ApiOperation({ summary: 'Получение одного пользователя' })
-  @ApiOkResponse({ description: 'Успешное дного пользователя' })
+  @ApiOkResponse({ description: 'Успешное получение одного пользователя' })
   @Get('/:id')
-    async getOneUser (id: string) {
-    try {
-      const user = await this.prisma.users.findFirst({
-        where: { id }
-      });
-
-      if (!user) {
-        throw new NotFoundException('User  not found.');
-      }
-
-      return user;
-    } catch (error) {
-      throw new HttpException({ error }, 500);
+  findOne(@Param('id') id: string) {
+    if (!isValidObjectId(id)) {
+      throw new BadRequestException('Invalid user ID format.');
     }
+    return this.usersService.getOneUser (id);
   }
-}
 
 
   @ApiOperation({ summary: 'Получение списка топ пользователей' })
