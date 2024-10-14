@@ -2,6 +2,7 @@ import { Body, Controller, Get, Headers, Post, UseGuards, Param } from '@nestjs/
 import { UsersService } from './users.service';
 import { ApiTags, ApiOkResponse, ApiOperation, ApiBearerAuth, ApiUnauthorizedResponse } from '@nestjs/swagger';
 import { AuthGuard } from 'src/guards/auth.guard';
+import { HttpException } from '@nestjs/common';
 
 @ApiTags('Users')
 @Controller('/api/v1/users')
