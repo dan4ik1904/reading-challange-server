@@ -15,12 +15,26 @@ export class UsersController {
     return this.usersService.findAll()
   }
 
-  // @ApiOperation({ summary: 'Получение одного пользователя' })
-  // @ApiOkResponse({ description: 'Успешное дного пользователя' })
-  // @Get('/:id')
-  // findOne(@Param('id') id: string) {
-  //   return this.usersService.getOneUser(id)
-  // }
+  @ApiOperation({ summary: 'Получение одного пользователя' })
+  @ApiOkResponse({ description: 'Успешное дного пользователя' })
+  @Get('/:id')
+    async getOneUser (id: string) {
+    try {
+      const user = await this.prisma.users.findFirst({
+        where: { id }
+      });
+
+      if (!user) {
+        throw new NotFoundException('User  not found.');
+      }
+
+      return user;
+    } catch (error) {
+      throw new HttpException({ error }, 500);
+    }
+  }
+}
+
 
   @ApiOperation({ summary: 'Получение списка топ пользователей' })
   @ApiOkResponse({ description: 'Успешное получение списка топ пользователей' })
@@ -39,4 +53,8 @@ export class UsersController {
     const tgIdNumber = Number(tgId);
     return this.usersService.getClassmates(tgIdNumber);
   }
+}
+
+function isValidObjectId(id: string): boolean {
+  return /^[0-9a-fA-F]{24}$/.test(id);
 }
