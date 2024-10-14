@@ -18,7 +18,7 @@ export class UsersController {
   @ApiOperation({ summary: 'Получение одного пользователя' })
   @ApiOkResponse({ description: 'Успешное дного пользователя' })
   @Get('/:id')
-  findOne() {
+  findOne(@Param('id') id: string) {
     return this.usersService.getOneUser(id)
   }
 
