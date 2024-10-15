@@ -16,17 +16,6 @@ export class UsersController {
     return this.usersService.findAll()
   }
 
-  @ApiOperation({ summary: 'Получение одного пользователя' })
-  @ApiOkResponse({ description: 'Успешное получение одного пользователя' })
-  @Get('/:id')
-  findOne(@Param('id') id: string) {
-    if (!isValidObjectId(id)) {
-      throw new HttpException('Invalid user ID format.', 500);
-    }
-    return this.usersService.getOneUser (id);
-  }
-
-
   @ApiOperation({ summary: 'Получение списка топ пользователей' })
   @ApiOkResponse({ description: 'Успешное получение списка топ пользователей' })
   @Get('/top')
@@ -43,6 +32,16 @@ export class UsersController {
   getClassmates(@Headers('Authorization') tgId: string) {
     const tgIdNumber = Number(tgId);
     return this.usersService.getClassmates(tgIdNumber);
+  }
+  
+  @ApiOperation({ summary: 'Получение одного пользователя' })
+  @ApiOkResponse({ description: 'Успешное получение одного пользователя' })
+  @Get('/:id')
+  findOne(@Param('id') id: string) {
+    if (!isValidObjectId(id)) {
+      throw new HttpException('Invalid user ID format.', 500);
+    }
+    return this.usersService.getOneUser (id);
   }
 }
 
