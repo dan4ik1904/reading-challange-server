@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Headers, Post, UseGuards, Param } from '@nestjs/common';
+import { Body, Controller, Get, Headers, Post, UseGuards, Param, Query } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { ApiTags, ApiOkResponse, ApiOperation, ApiBearerAuth, ApiUnauthorizedResponse } from '@nestjs/swagger';
 import { AuthGuard } from 'src/guards/auth.guard';
@@ -16,11 +16,15 @@ export class UsersController {
     return this.usersService.findAll()
   }
 
-  @ApiOperation({ summary: 'Получение списка топ пользователей' })
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Получение списка топ пользователей (с пагинацией)' })
   @ApiOkResponse({ description: 'Успешное получение списка топ пользователей' })
   @Get('/top')
-  getTop() {
-    return this.usersService.getTop()
+  getTop(
+    @Query('page') page: number,
+    @Query('limit') limit: number
+  ) {
+    return this.usersService.getTop(page, limit);
   }
 
   @ApiBearerAuth()
@@ -41,7 +45,7 @@ export class UsersController {
     if (!isValidObjectId(id)) {
       throw new HttpException('Invalid user ID format.', 500);
     }
-    return this.usersService.getOneUser (id);
+    return this.usersService.getOneUser(id);
   }
 }
 

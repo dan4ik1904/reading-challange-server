@@ -37,18 +37,20 @@ export class UsersService {
         
     }
 
-    async getTop() {
+    async getTop(page: number, limit: number) { // Добавляем page и limit
         try {
-            const users = await this.prisma.users.findMany({
-                orderBy: {
-                    pagesCount: 'desc'
-                }
-            })
-            return users
+          const users = await this.prisma.users.findMany({
+            orderBy: {
+              pagesCount: 'desc'
+            },
+            skip: (page - 1) * limit, // Пропускаем (page - 1) * limit записей
+            take: Number(limit) // Берем limit записей
+          });
+          return users;
         } catch (error) {
-            throw new HttpException({error}, 500)
+            console.error(error)
+          throw new HttpException({ error }, 500);
         }
-        
     }
 
     async getClassmates(tgId: number) {
