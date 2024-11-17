@@ -92,9 +92,27 @@ export class AuthService {
     }
 
     async updateMe(tgId: number, updateMeDto: UpdateMeDto) {
-        const session = await this.prisma.users_sessions.findFirst({
+        await this.prisma.users_sessions.findFirst({
             where: {tgId}
         })
+    }
+
+    async authLogout(tgId: number) {
+        try {
+            const session = await this.prisma.users_sessions.findFirst({
+                where: {
+                    tgId
+                }
+            })
+            const sessionDelete = await this.prisma.users_sessions.delete({
+                where: {
+                    id: session.id
+                }
+            })
+            return sessionDelete
+        } catch (error) {
+            
+        }
     }
 
 }

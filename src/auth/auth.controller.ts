@@ -70,5 +70,11 @@ export class AuthController {
         const tgIdNumber = Number(tgId)
         return this.authService.getMySessions(tgIdNumber)
     }
+    
+    @Post('/logout')
+    authLogout(@Headers('Authorization') tgId: string) {
+        const tgIdNumber = Number(tgId)
+        return this.authService.authLogout(tgIdNumber)
+    }
 
 }
