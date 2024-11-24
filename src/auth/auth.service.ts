@@ -11,44 +11,46 @@ export class AuthService {
 
     async auth(authDto: AuthDto) {
         try {
-            const checkUser = await this.prisma.users.findFirst({
+            // Найти пользователя по полям fullName и className
+            const user = await this.prisma.users.findFirst({
                 where: {
                     fullName: authDto.fullName,
-                    className: authDto.className
-                }
-            })
-            if(!checkUser) {
-                await this.prisma.users.create({
-                    data: {
-                        className: authDto.className,
-                        fullName: authDto.fullName
-                    }
-                })
-                const user = await this.prisma.users.findFirst({
-                    where: {
-                        fullName: authDto.fullName,
-                        className: authDto.className
-                    }
-                })
-                await this.prisma.users_sessions.create({
-                    data: {
-                        tgId: authDto.tgId,
-                        userId: user.id
-                    }
-                })
-            }else {
-                await this.prisma.users_sessions.create({
-                    data: {
-                        userId: checkUser.id,
-                        tgId: authDto.tgId
-                    }
-                })
+                    className: authDto.className,
+                },
+            });
+    
+            // Если пользователь не найден, создаем нового
+            const createdUser = user || await this.prisma.users.create({
+                data: {
+                    className: authDto.className,
+                    fullName: authDto.fullName,
+                },
+            });
+    
+            // Проверяем наличие существующих сессий
+            const existingSession = await this.prisma.users_sessions.findFirst({
+                where: { userId: createdUser.id },
+            });
+    
+            if (existingSession) {
+                throw new HttpException({ message: 'У пользователя уже есть активная сессия.' }, 409); // 409 Конфликт
             }
-            return {message: 'secsess'}
+    
+            await this.prisma.users_sessions.create({
+                data: {
+                    tgId: authDto.tgId,
+                    userId: createdUser.id,
+                },
+            });
+    
+            return { message: 'success' };
         } catch (error) {
-            throw new HttpException({error}, 500)
+            if (error instanceof HttpException) {
+                throw error; // Повторно вызываем существующее исключение HttpException
+            }
+            console.error("Непредвиденная ошибка во время аутентификации:", error); // Логируем непредвиденные ошибки
+            throw new HttpException({ message: 'Произошла непредвиденная ошибка.' }, 500); // Общая ошибка сервера
         }
-        
     }
 
     async getMe(tgId: number) {

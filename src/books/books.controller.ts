@@ -18,6 +18,15 @@ export class BooksController {
     return this.booksService.getAll()
   }
 
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Получение списка книг пользователя' })
+  @ApiOkResponse({ description: 'Успешное получение списка книг пользователя' })
+  @ApiUnauthorizedResponse({ description: 'Не авторизован' })
+  @Get('/top/:userId')
+  getMyTopBooks(@Param('userId') userId: string) {
+    return this.booksService.getMyTopBooks(userId)
+  }
+
   @ApiOperation({ summary: 'Получение книги по ID' })
   @ApiOkResponse({ description: 'Успешное получение книги' })
   @Get("/:id")

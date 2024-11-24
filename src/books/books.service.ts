@@ -46,6 +46,22 @@ export class BooksService {
         
     }
 
+    async getMyTopBooks(userId: string) {
+        try {
+
+            const books = await this.prisma.books.findMany({
+                where: {userId},
+                orderBy: {
+                    pageCount: 'desc'
+                }
+            })
+            return books
+        } catch (error) {
+            throw new HttpException({error}, 500)
+        }
+
+    }
+
     async updateOne(id: string, updateBookDto: UpdateBookDto, tgId: number) {
         try {
             const book = await this.prisma.books.findFirst({ where: { id } });
@@ -142,4 +158,6 @@ export class BooksService {
         }
         
     }
+
+
 }
