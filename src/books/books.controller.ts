@@ -53,8 +53,9 @@ export class BooksController {
   @ApiUnauthorizedResponse({ description: 'Не авторизован' })
   @UseGuards(AuthorBookGuard)
   @Delete('/:id')
-  deleteOne(@Param('id') id: string) {
-    return this.booksService.deleteBook(id)
+  deleteOne(@Param('id') id: string, @Headers('Authorization') tgId: string) {
+    const tgIdNumber = Number(tgId)
+    return this.booksService.deleteBook(id, tgIdNumber)
   }
 
   @ApiBearerAuth()

@@ -147,12 +147,36 @@ export class BooksService {
         
     }
 
-    async deleteBook(id: string) {
+    async deleteBook(id: string, tgId: number) {
         try {
+            const user_session = await this.prisma.users_sessions.findFirst({
+                where: {
+                    tgId
+                }
+            })
+            const user = await this.prisma.users.findFirst({
+                where: {
+                    id: user_session.userId
+                }
+            })
+            const thisBook = await this.prisma.books.findFirst({
+                where: {
+                    id
+                }
+            })
+            const updUser = await this.prisma.users.update({
+                where: {
+                    id: user_session.userId
+                },
+                data: {
+                    pagesCount: user.pagesCount -thisBook.pageCount,
+                    booksCount: user.booksCount - 1
+                }
+            })
             const book = await this.prisma.books.delete({
                 where: { id }
             })
-            return this.prisma.books.findFirst({where:{id}})
+            return book
         } catch (error) {
             throw new HttpException({message: 'No user'}, 400)
         }

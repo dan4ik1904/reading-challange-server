@@ -37,21 +37,29 @@ export class UsersService {
         
     }
 
-    async getTop(page: number, limit: number) { // Добавляем page и limit
+    async getTop(page: number, limit: number) {
+        // Проверяем, что page и limit положительные числа
+        if (page < 1 || limit < 1) {
+            throw new HttpException('Page and limit must be greater than 0', 400);
+        }
+    
         try {
-          const users = await this.prisma.users.findMany({
-            orderBy: {
-              pagesCount: 'desc'
-            },
-            skip: (page - 1) * limit, // Пропускаем (page - 1) * limit записей
-            take: Number(limit) // Берем limit записей
-          });
-          return users;
+            const users = await this.prisma.users.findMany({
+                orderBy: [
+                    { pagesCount: 'desc' },
+                    { id: 'asc' } // Сортировка по id для предотвращения повторений
+                ],
+                skip: (page - 1) * limit,
+                take: Number(limit)
+            });
+    
+            return users.length > 0 ? users : []; // Возвращаем пустой массив, если пользователей нет
         } catch (error) {
-            console.error(error)
-          throw new HttpException({ error }, 500);
+            console.error('Error fetching top users:', error);
+            throw new HttpException({ error: error.message || 'Internal Server Error' }, 500);
         }
     }
+    
 
     async getClassmates(tgId: number) {
         try {

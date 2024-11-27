@@ -41,7 +41,6 @@ export class AuthController {
     @ApiOkResponse({ description: 'Успешное получение списка книг пользователя' })
     @ApiUnauthorizedResponse({ description: 'Не авторизован' })
     @UseGuards(AuthGuard)
-    @UseGuards(AuthorBookGuard)
     @Get('/mybooks')
     getMy(@Headers('Authorization') tgId: string) {
       const tgIdNumber = Number(tgId)

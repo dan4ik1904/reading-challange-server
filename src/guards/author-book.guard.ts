@@ -5,32 +5,44 @@ import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
 export class AuthorBookGuard implements CanActivate {
-  constructor(private reflector: Reflector, private readonly prisma: PrismaService) {}
+    constructor(private reflector: Reflector, private readonly prisma: PrismaService) {}
 
-  async canActivate(context: ExecutionContext): Promise<boolean> {
-    const req: Request = context.switchToHttp().getRequest();
-    const tgId = req.headers.authorization;
+    async canActivate(context: ExecutionContext): Promise<boolean> {
+        const req: Request = context.switchToHttp().getRequest();
+        const tgId = req.headers.authorization;
 
-    if (!tgId) throw new HttpException({message: 'No authorizade'}, 401);
+        if (!tgId) throw new HttpException({ message: 'No authorized' }, 401);
 
-    const session = await this.prisma.users_sessions.findFirst({
-        where: {
-            tgId: Number(tgId)
+        const session = await this.prisma.users_sessions.findFirst({
+            where: {
+                tgId: Number(tgId)
+            }
+        });
+
+        if (!session) {
+            throw new HttpException({ message: 'Session not found' }, 401);
         }
-    })
-    const user = await this.prisma.users.findFirst({
-        where: { id: session.userId }
-    })
-    const book = await this.prisma.books.findFirst({
-        where: {
-            userId: session.userId
+
+        const user = await this.prisma.users.findFirst({
+            where: { id: session.userId }
+        });
+
+        if (!user) {
+            throw new HttpException({ message: 'User not found' }, 404);
         }
-    }) 
 
-    console.log(user.id, book.userId)
+        const book = await this.prisma.books.findFirst({
+            where: {
+                id: req.params.id
+            }
+        });
 
-    if(user.id != book.userId) throw new HttpException({message: 'No authorizade'}, 403)
-    return true
-    
-  }
+        if (!book) {
+            throw new HttpException({ message: 'Book not found' }, 404);
+        }
+
+        if (user.id != book.userId) throw new HttpException({ message: 'No authorized' }, 403);
+        
+        return true;
+    }
 }
